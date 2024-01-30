@@ -1,0 +1,148 @@
+{% extends 'base/base.html' %}
+<!--get all content from base.html-->
+{% load static %}
+{% block title %}Burr Rentals LLC - Date{% endblock title %}
+
+
+{% block header %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+{% endblock header %}
+
+{% block body %}
+
+<section id="cart-page">
+  <!--**Heading**********************-->
+  <h1 class="cart-page-heading">
+    <i class="fa-solid fa-cart-shopping"></i> Booking Form
+  </h1>
+
+  <form class="booking-container" method="post" action="{% url 'save_booking' %}">
+  {% csrf_token %}
+  <div class="booking-container-form">
+    <span>{{message}}</span>
+    <div class="booking-form-box">
+      <label>Pickup And DropOff Date</label>
+      <input name="pickup_dropoff" type="text" id="id_pickup_dropoff_date" placeholder="-- -- --" onchange="getFormValues()" required>
+    </div>
+    <div class="booking-form-box-container" style="margin-top: 15px;">
+      <div class="booking-form-box">
+        <label>Pickup Time</label>
+        <input name="pickup_time" type="time" required>
+      </div>
+      <div class="booking-form-box">
+        <label>DropOff Time</label>
+        <input name="dropoff_time" type="time" required>
+      </div>
+    </div>
+    <div class="booking-form-box-simple">
+      <div class="booking-form-box">
+        <label>Your Pickup Location</label>
+        <input name="pickup_location" type="text" placeholder="Address, City, Country" required>
+      </div>
+      <div class="booking-form-box">
+        <label>Your City</label>
+        <input name="city" type="text" placeholder="City" required>
+      </div>
+      <div class="booking-form-box">
+        <label>Your Name</label>
+        <input name="full_name" type="text" placeholder="Full Name" required>
+      </div>
+      <div class="booking-form-box">
+        <label>Your Phone</label>
+        <input name="phone" type="tell" placeholder="Phone Number" required>
+      </div>
+      <input type="hidden" name="car_id" value="{{car.id}}">
+      <input type="hidden" name="car_address" value="{{car.complete_location}}">
+      <input type="hidden" name="user_address" value="{{user.address}}">
+      
+    </div>
+  </div>
+
+  
+  <div class="booking-container-img-container">
+    <div class="booking-container-img">
+      <img src="{{car.product_img.url}}" alt="{{car.title}}">
+    </div>
+    <div class="order-summary">
+      <strong class="order-summary-heading">Order Summary</strong>
+      <div class="summary-box">
+        <table class="summary-product">
+          <tr>
+            <td>Per Day Amount</td>
+            <td class="summary-tabel-amount" id="per-day-amount">
+              {{car.selling_price}}$
+            </td>
+          </tr>
+          <tr>
+            <td>Days</td>
+            <td class="summary-tabel-amount" id="summary-days">
+              0
+            </td>
+          </tr>
+          <tr>
+            <td>Total Amount</td>
+            <td class="summary-tabel-amount" id="total-amount">
+              {{car.selling_price|floatformat:2}}$
+            </td>
+          </tr>
+        </table>
+        <table class="summary-total">
+          <tr>
+            <td class="summary-subtotal-h">SubTotal Amount</td>
+            <td class="summary-tabel-subamount">
+              $<span id="subtotal-amount" style="color: #333333">0</span>
+            </td>
+          </tr>
+        </table>
+        <span>*Including Shipping</span>
+      </div>
+     <button type="submit" class="cart-place-order-btn">Ready To Pay</button>
+    </div>
+  </div>
+
+  </form>
+</section>
+
+<!-- Your HTML template -->
+
+
+{% block p_script %}
+<!-- Initialize flatpickr on the pickup_date input -->
+<script>
+  flatpickr("#id_pickup_dropoff_date", {
+    mode:"range",
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    enable: {{ available_dates|safe }},
+    });
+
+    getFormValues();
+    function getFormValues() {
+        // Retrieve the values using JavaScript
+        var dateRange = document.getElementById('id_pickup_dropoff_date').value.split(" to ");
+        var pickupDateStr = dateRange[0];
+        var dropoffDateStr = dateRange[1];
+
+        // Parse the date strings into Date objects
+        var pickupDate = new Date(pickupDateStr);
+        var dropoffDate = new Date(dropoffDateStr);
+
+        // Calculate the difference in days, considering both pickup and dropoff day
+        var timeDiff = dropoffDate - pickupDate;
+        var daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+
+        // Do something with the calculated value (e.g., log or alert)
+        document.getElementById("summary-days").innerText = daysDiff;
+        document.getElementById("total-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2) + "$";
+        document.getElementById("subtotal-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2);
+        console.log('Pickup Date:', pickupDate);
+        console.log('Dropoff Date:', dropoffDate);
+        console.log('Number of days:', daysDiff);
+    }
+</script>
+
+
+{% endblock p_script %}
+{% endblock body %}
