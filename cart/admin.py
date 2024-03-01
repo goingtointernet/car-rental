@@ -10,5 +10,5 @@ class CartModelAdmin(admin.ModelAdmin):
 # Bookimg
 @admin.register(Booking)
 class BookingModelAdmin(admin.ModelAdmin):
-    list_display = ['id','user', 'car','rent_days','order_date','status']
+    list_display = ['id','user', 'car','rent_days','user_pay','remaning_amount','status']
 

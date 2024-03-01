@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from numpy import product
-from .models import StaticPosts
+from .models import StaticPosts, Faqs
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.views import View
@@ -68,3 +68,12 @@ def search(request):
 
 def custom_404(request, exception):
     return render(request, "home/404.html", {}, status=404)
+
+
+
+
+#==Static-post============================#
+def faqs(request):
+    allfaqs = Faqs.objects.all().order_by("-pk")
+    context = {'faqs': allfaqs}
+    return render(request, 'home/faqs.html', context)   

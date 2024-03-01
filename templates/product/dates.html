@@ -53,9 +53,21 @@
         <label>Your Phone</label>
         <input name="phone" type="tell" placeholder="Phone Number" required>
       </div>
+      <div class="booking-form-box">
+        <label>Insurance</label>
+        <div class="insurance_box_container">
+          <input type="checkbox" id="own_insurance" name="own_insurance">
+          <label for="own_insurance" class="own_insurance insurance_box" onclick="uncheckAllExcept('own_insurance')" >Use Own Insurance</label>
+          <input type="checkbox" id="supplemental_liability_coverage" name="supplemental_liability_coverage" checked>
+          <label for="supplemental_liability_coverage" class="supplemental_liability_coverage insurance_box" onclick="uncheckAllExcept('supplemental_liability_coverage')">Supplemental Liability Coverage</label>
+          <input type="checkbox" id="damage_coverage" name="damage_coverage">
+          <label for="damage_coverage" class="damage_coverage insurance_box" onclick="uncheckAllExcept('damage_coverage')">Damage Coverage</label>
+        </div>
+      </div>
       <input type="hidden" name="car_id" value="{{car.id}}">
       <input type="hidden" name="car_address" value="{{car.complete_location}}">
       <input type="hidden" name="user_address" value="{{user.address}}">
+      <input type="hidden" id="input_insurance_amount" name="insurance_amount" value="{{ car.supplemental_liability_coverage }}">
       
     </div>
   </div>
@@ -82,11 +94,25 @@
             </td>
           </tr>
           <tr>
-            <td>Total Amount</td>
-            <td class="summary-tabel-amount" id="total-amount">
-              {{car.selling_price|floatformat:2}}$
+            <td>Tax</td>
+            <td class="summary-tabel-amount" id="t">
+              {{ car.total_tax}}$
             </td>
           </tr>
+          <tr>
+            <td>Insurance</td>
+            <td class="summary-tabel-amount" id="insurance-amount">
+              {{car.supplemental_liability_coverage}}$
+            </td>
+          </tr>
+          {% if globalDiscount.discount_price %}
+          <tr>
+            <td>Discount</td>
+            <td class="summary-tabel-amount">
+              {{globalDiscount.discount_price|floatformat:2}}$
+            </td>
+          </tr>
+          {% endif %}
         </table>
         <table class="summary-total">
           <tr>
@@ -117,6 +143,8 @@
     minDate: "today",
     enable: {{ available_dates|safe }},
     });
+    let day = 0;
+    var inputElement = document.getElementById("input_insurance_amount");
 
     getFormValues();
     function getFormValues() {
@@ -132,15 +160,53 @@
         // Calculate the difference in days, considering both pickup and dropoff day
         var timeDiff = dropoffDate - pickupDate;
         var daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+        day = daysDiff
 
         // Do something with the calculated value (e.g., log or alert)
-        document.getElementById("summary-days").innerText = daysDiff;
-        document.getElementById("total-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2) + "$";
-        document.getElementById("subtotal-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2);
+        document.getElementById("summary-days").innerText = daysDiff||0;
+        // document.getElementById("total-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2) + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * (daysDiff)) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.supplemental_liability_coverage }})||0;
+        inputElement.value ={{ car.supplemental_liability_coverage }};
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
     }
+
+    function uncheckAllExcept(checkboxId) {
+      var checkboxes = document.querySelectorAll('.insurance_box_container input[type="checkbox"]');
+      checkboxes.forEach(function(checkbox) {
+          if (checkbox.id !== checkboxId) {
+              checkbox.checked = false;
+          }
+      });
+
+      if(checkboxId == "supplemental_liability_coverage"){
+        document.getElementById("insurance-amount").innerText = {{ car.supplemental_liability_coverage }} + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.supplemental_liability_coverage }}).toFixed(2);
+        inputElement.value = {{ car.supplemental_liability_coverage }};
+      }
+      else if (checkboxId == "damage_coverage") {
+        document.getElementById("insurance-amount").innerText = {{ car.damage_coverage }} + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.damage_coverage }}).toFixed(2);
+        inputElement.value ={{ car.damage_coverage }};
+      } else {
+        document.getElementById("insurance-amount").innerText = 0 + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}}).toFixed(2);
+        inputElement.value =0;
+      }
+      
+  }
+
+  
+  function resetCheckboxes() {
+      var checkboxes = document.querySelectorAll('.insurance_box_container input[type="checkbox"]');
+      checkboxes.forEach(function(checkbox) {
+        checkbox.checked = checkbox.defaultChecked;
+      });
+    }
+
+    // Call the reset function when the page loads
+    window.onload = resetCheckboxes;
 </script>
 
 

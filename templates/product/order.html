@@ -39,7 +39,11 @@
         </div>
         <!--price-->
         <div class="cart-box-price">
-          <span><b>Price:</b>${{order.order_price|floatformat:2}}</span>
+          <span><b>Total Amount:</b>${{order.total_amount|floatformat:2}}</span>
+          {% if remaning_amount %}
+          <span><b>Pay Amount:</b>${{order.user_pay|floatformat:2}}</span>
+          <span><b>Remaning Amount:</b>${{order.remaning_amount|floatformat:2}}</span>
+          {% endif %}
           {% if order.status == "Pending" %}
           <span class="place-order-status"><b>Status:</b> Pending</span>
           <progress value="1" class="pending" max="100"></progress>

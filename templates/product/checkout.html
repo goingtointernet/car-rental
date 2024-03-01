@@ -81,9 +81,23 @@
           <tr>
             <td>Total Taxes</td>
             <td class="summary-tabel-amount">
-              {{summary_shipping|floatformat:2}}$
+              {{booking_car_details.car.total_tax|floatformat:2}}$
             </td>
           </tr>
+          <tr>
+            <td>Insurance</td>
+            <td class="summary-tabel-amount">
+              {{booking_car_details.insurance_amount|floatformat:2}}$
+            </td>
+          </tr>
+          {% if globalDiscount.discount_price %}
+          <tr>
+            <td>Discount</td>
+            <td class="summary-tabel-amount">
+              {{globalDiscount.discount_price|floatformat:2}}$
+            </td>
+          </tr>
+          {% endif %}
         </table>
         <table class="summary-total">
           <tr>

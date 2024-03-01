@@ -6,5 +6,6 @@ urlpatterns = [
     path('all-products',views.ProductAll.as_view(), name='allproduct'),
     path('contact',views.contact, name='contact'),
     path('search',views.search, name='search'),
+    path('faqs',views.faqs, name='faqs'),
     path('<str:slug>',views.staticpost, name='staticpost'),
 ]

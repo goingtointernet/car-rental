@@ -15,10 +15,9 @@
   <div class="hero-content">
     <!--**text****************-->
     <div class="hero-text">
-      <h1>Your Journet, Your Car, Your Way</h1>
+      <h1>{{sitedata.home_heading}}</h1>
       <p>
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Id, vitae ex!
-        Fuga similique repudiandae molestiae libero.
+        {{sitedata.home_paragraph}}
       </p>
       <!--btns-->
       <div class="hero-text-btns">
@@ -30,7 +29,7 @@
     </div>
     <!--**img*****************-->
     <div class="hero-img">
-      <img src="{% static 'images/hero.png' %}" alt="model" />
+      <img src="{{sitedata.home_banner_img.url}}" alt="model" />
     </div>
   </div>
 </section>
@@ -39,10 +38,9 @@
 <section id="partner">
   <!--**logo-container****************-->
   <div class="logo-container">
-    <img alt="" src="{% static 'images/logo-1.png' %}" />
-    <img alt="" src="{% static 'images/logo-2.png' %}" />
-    <img alt="" src="{% static 'images/logo-3.png' %}" />
-    <img alt="" src="{% static 'images/logo-4.png' %}" />
+    {% for logo in sitedata.home_logo.all %}
+    <img alt="" src="{{logo.image.url}}" />
+    {% endfor %}
   </div>
 </section>
 <!--partner-end-->

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from numpy import product
 from cart.models import Cart, Booking
+from products.models import CustomDiscount
 from products.models import Product
 from django.db.models import Q
 from account.models import User
@@ -84,11 +85,12 @@ def payment_done(request, cart_id):
                 city=cart.city,
                 seller_car_location=cart.seller_car_location,
                 rent_days=cart.rent_days, 
+                insurance_amount = cart.insurance_amount,
                 total_amount=cart.total_amount, 
                 user_name=cart.user_name,
                 user_phone=cart.user_phone,
                 user_address=cart.user_address,
-                order_price=cart.total_amount, 
+                user_pay=cart.total_amount, 
             )
         booking.save()
         cart_booking = Cart.objects.filter(user=request.user)
@@ -176,8 +178,15 @@ def save_booking(request):
             name = request.POST['full_name']
             car_location = request.POST['car_address']
             user_address = request.POST['user_address']
-            print(pickup_dropoff_date, name, pickup_time, dropoff_time, pickup_location, city, phone, car_id, car_location, user_address)
+            insurance_amount = request.POST['insurance_amount']
+            print(insurance_amount, "ins")
             required_fields = [pickup_dropoff_date, name, pickup_time, dropoff_time, pickup_location, city, phone, car_id]
+            custom_discounts = CustomDiscount.objects.all()
+            if custom_discounts.exists():
+                global_discount = custom_discounts[0]
+            else:
+                global_discount = 0
+            
             if None in required_fields or '' in required_fields:
                 return redirect('car_booking',car_id)
             if 'to' in pickup_dropoff_date:
@@ -219,11 +228,12 @@ def save_booking(request):
                 city=city,
                 seller_car_location=car_location,
                 rent_days=rental_days, 
-                total_amount=car_instance.selling_price*rental_days, 
+                total_amount=car_instance.selling_price*rental_days+car_instance.total_tax - int(global_discount.discount_price) + int(insurance_amount), 
                 user_name=name,
+                insurance_amount = insurance_amount,
                 user_phone=phone,
                 user_address=user_address,
-                order_price=car_instance.selling_price*rental_days, 
+                order_price=car_instance.selling_price*rental_days+car_instance.total_tax - int(global_discount.discount_price) + int(insurance_amount), 
             )
             cart.save()
             return redirect('checkout',cart.id)

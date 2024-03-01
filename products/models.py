@@ -39,7 +39,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     selling_price = models.FloatField()
     discounted_price = models.FloatField()
-    shipping_price = models.FloatField(default=0)
+    total_tax = models.FloatField(default=0)
     description = models.TextField()
     seats = models.FloatField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -62,6 +62,9 @@ class Product(models.Model):
         <li>Helps to leave hair healthy and more manageable </li>
     </ul>''')
     is_available = models.BooleanField(default=True)
+    use_own_insurance = models.BooleanField(default=False)
+    supplemental_liability_coverage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    damage_coverage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     permalink =models.CharField(max_length=70, unique=True)
 
     def __str__(self):
@@ -84,4 +87,11 @@ class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CustomDiscount(models.Model):
+    # your existing fields
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_valid_days = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

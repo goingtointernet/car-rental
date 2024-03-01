@@ -11,6 +11,8 @@ class StaticPosts(models.Model):
     def __str__(self):
         return self.title
 
+class PatreonImage(models.Model):
+    image = models.ImageField(upload_to='patreon_logos')
 
 # Site-Data.
 class SiteData(models.Model):
@@ -21,6 +23,20 @@ class SiteData(models.Model):
     twitter = models.CharField(max_length=160,default="", blank=True, null=True)
     youtube = models.CharField(max_length=160,default="", blank=True, null=True)
     address = models.CharField(max_length=260,default="")
+    home_heading = models.CharField(max_length=160,default="")
+    home_paragraph = models.CharField(max_length=160,default="")
+    home_banner_img = models.ImageField(upload_to='home_banner',blank=True, null=True)
+    home_logo = models.ManyToManyField(PatreonImage, blank=True, null=True)
     made_by = models.CharField(max_length=160,default="")
     copyright = models.CharField(max_length=160,default="")
+    footer_large_text1 = models.CharField(max_length=160,default="")
+    footer_large_text2 = models.CharField(max_length=160,default="")
 
+
+
+class Faqs(models.Model):
+    question = models.CharField(max_length=260)
+    answer = models.TextField()
+
+    def __str__(self):
+        return self.question

@@ -50,8 +50,8 @@
 
 
         <div class="page-product-total">
-            <strong>{{product.selling_price}}$ <span style="color:#ff2616;"> + {% if product.shipping_price == 0 %}Free
-                    {% else %} {{product.shipping_price}}${% endif %} Taxes</span></strong>
+            <strong>{{product.selling_price}}$ <span style="color:#ff2616;"> + {% if product.total_tax == 0 %}Free
+                    {% else %} {{product.total_tax}}${% endif %} Taxes</span></strong>
             <p></p>
         </div>
 </div>
@@ -210,8 +210,8 @@
 
 
     const div = document.getElementById('product-page-discount');
-    var discountPrice = ({{ product.discounted_price }} - {{product.selling_price}}) 
-    var discount = discountPrice / {{ product.discounted_price }} *100  
+    var discountPrice = ({{ product.discounted_price }} + {{product.selling_price}})
+    var discount =  {{product.selling_price}} / discountPrice *100  
     div.innerHTML = discount.toFixed(2)
 
 

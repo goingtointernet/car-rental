@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %} <!--get all content from base.html-->
+
+{% load static %}
+
+<!--==Title========================-->
+{% block title %} Faqs - Burr Rentals LLC{% endblock title %}
+
+
+<!--==Body=========================-->
+{% block body %}
+
+
+<!--==Static-page=========================-->
+<section class="static-page">
+
+    <div class="static-container">
+
+        <div class="static-title">
+            <span class="static-page-title-label">Title</span>
+            <h1>Frequently Asked Question</h1>
+        </div>
+
+        
+        <div class="static-content">
+
+            <div class="accordion">
+                {% for faq in faqs %}
+                <div class="accordion-item">
+                  <button id="accordion-button-1" aria-expanded="false">
+                    <span class="accordion-title">{{faq.question}}</span>
+                    <span class="icon" aria-hidden="true"></span>
+                  </button>
+                  <div class="accordion-content">
+                    <p>
+                      {{faq.answer}}
+                    </p>
+                  </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% comment %} <p>{{staticpost.content | safe}}</p> {% endcomment %}
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+{% endblock body %}
+
+{% block p_script %}
+<script>
+const items = document.querySelectorAll('.accordion button');
+
+function toggleAccordion() {
+  const itemToggle = this.getAttribute('aria-expanded');
+
+  for (i = 0; i < items.length; i++) {
+    items[i].setAttribute('aria-expanded', 'false');
+  }
+
+  if (itemToggle == 'false') {
+    this.setAttribute('aria-expanded', 'true');
+  }
+}
+
+items.forEach((item) => item.addEventListener('click', toggleAccordion));
+</script>
+{% endblock p_script %}
