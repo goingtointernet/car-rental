@@ -32,6 +32,16 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
+class AvaibleTiming(models.Model):
+    Time = models.CharField(max_length=160, unique= True, default="")
+    def __str__(self):
+        return self.Time
+    
+class PickupLocation(models.Model):
+    location = models.CharField(max_length=160, unique= True, default="")
+    def __str__(self):
+        return self.location
+    
 # Product
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
@@ -51,6 +61,8 @@ class Product(models.Model):
     complete_location = models.CharField(max_length=300, default="")
     city = models.CharField(max_length=300, default="")
     country = models.CharField(max_length=300, default="")
+    available_timing = models.ManyToManyField(AvaibleTiming, null = True)
+    pickup_locations = models.ManyToManyField(PickupLocation, null = True)
     heighlights = models.TextField(default='''
     <strong>What is it? </strong>
     <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reiciendis vero voluptas ducimus inventore enim. Voluptas ipsam modi aliquid dicta voluptatem sit rem praesentium repellat corrupti, officia ducimus quos saepe molestias.</p>

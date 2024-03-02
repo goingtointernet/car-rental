@@ -34,7 +34,35 @@
   </div>
 </section>
 
-<!--==logo's=================================-->
+
+
+  <!--==Container=================-->
+  <div class="swiper mySwiperProduct mySwiperProduct2">
+    <div class="swiper-wrapper">
+      {% for product in all|slice:":10" %}
+      <div class="swiper-slide">
+        <!--**box******************-->
+        <div class="product-box product-box-no-border">
+          <!--img-->
+          <a
+            href="{% url 'product_page' product.category product.permalink %}"
+            class="product-img">
+            <img src="{{product.product_img.url}}" alt="{{product.title}}" />
+          </a>
+          <div class="product-text">
+            <a
+              href="{% url 'product_page' product.category product.permalink %}"
+              class="product-box-p-name"
+              >{{product.title}}</a
+            >
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!--==logo's=================================-->
 <section id="partner">
   <!--**logo-container****************-->
   <div class="logo-container">

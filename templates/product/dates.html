@@ -28,18 +28,42 @@
     </div>
     <div class="booking-form-box-container" style="margin-top: 15px;">
       <div class="booking-form-box">
-        <label>Pickup Time</label>
-        <input name="pickup_time" type="time" required>
+        <label for="pickup_time">Pickup Time</label>
+        {% if car.available_timing.all|length < 1 %}
+        <input name="pickup_time" type="Time" placeholder="Pickup Time" required>
+        {% else %}
+        <select name="pickup_time" id="pickup_time" required>
+          {% for option in car.available_timing.all %}
+          <option value="{{option}}">{{option}}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
       </div>
       <div class="booking-form-box">
-        <label>DropOff Time</label>
-        <input name="dropoff_time" type="time" required>
+        <label for="dropoff_time">DropOff Time</label>
+        {% if car.available_timing.all|length < 1 %}
+        <input name="dropoff_time" type="Time" placeholder="DropOff Time" required>
+        {% else %}
+        <select name="dropoff_time" id="dropoff_time" required>
+          {% for option in car.available_timing.all %}
+          <option value="{{option}}">{{option}}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
       </div>
     </div>
     <div class="booking-form-box-simple">
       <div class="booking-form-box">
-        <label>Your Pickup Location</label>
-        <input name="pickup_location" type="text" placeholder="Address, City, Country" required>
+        <label for="pickup_location">Your Pickup Location</label>
+        {% if car.pickup_locations.all|length < 1 %}
+        <input name="pickup_location" type="text" placeholder="Enter Location" required>
+        {% else %}
+        <select name="pickup_location" id="pickup_location" required>
+          {% for option in car.pickup_locations.all %}
+          <option value="{{option}}">{{option}}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
       </div>
       <div class="booking-form-box">
         <label>Your City</label>
@@ -56,9 +80,9 @@
       <div class="booking-form-box">
         <label>Insurance</label>
         <div class="insurance_box_container">
-          <input type="checkbox" id="own_insurance" name="own_insurance">
+          <input type="checkbox" id="own_insurance" name="own_insurance" checked>
           <label for="own_insurance" class="own_insurance insurance_box" onclick="uncheckAllExcept('own_insurance')" >Use Own Insurance</label>
-          <input type="checkbox" id="supplemental_liability_coverage" name="supplemental_liability_coverage" checked>
+          <input type="checkbox" id="supplemental_liability_coverage" name="supplemental_liability_coverage">
           <label for="supplemental_liability_coverage" class="supplemental_liability_coverage insurance_box" onclick="uncheckAllExcept('supplemental_liability_coverage')">Supplemental Liability Coverage</label>
           <input type="checkbox" id="damage_coverage" name="damage_coverage">
           <label for="damage_coverage" class="damage_coverage insurance_box" onclick="uncheckAllExcept('damage_coverage')">Damage Coverage</label>
@@ -102,7 +126,7 @@
           <tr>
             <td>Insurance</td>
             <td class="summary-tabel-amount" id="insurance-amount">
-              {{car.supplemental_liability_coverage}}$
+              0$
             </td>
           </tr>
           {% if globalDiscount.discount_price %}
@@ -165,11 +189,13 @@
         // Do something with the calculated value (e.g., log or alert)
         document.getElementById("summary-days").innerText = daysDiff||0;
         // document.getElementById("total-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2) + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * (daysDiff)) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.supplemental_liability_coverage }})||0;
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * (daysDiff)) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + 0)||0;
         inputElement.value ={{ car.supplemental_liability_coverage }};
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
+
+        resetCheckboxes();
     }
 
     function uncheckAllExcept(checkboxId) {
@@ -181,14 +207,14 @@
       });
 
       if(checkboxId == "supplemental_liability_coverage"){
-        document.getElementById("insurance-amount").innerText = {{ car.supplemental_liability_coverage }} + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.supplemental_liability_coverage }}).toFixed(2);
-        inputElement.value = {{ car.supplemental_liability_coverage }};
+        document.getElementById("insurance-amount").innerText = ({{ car.supplemental_liability_coverage }}*day) + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + ({{ car.supplemental_liability_coverage }} * day)).toFixed(2);
+        inputElement.value = {{ car.supplemental_liability_coverage }} * day;
       }
       else if (checkboxId == "damage_coverage") {
-        document.getElementById("insurance-amount").innerText = {{ car.damage_coverage }} + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + {{ car.damage_coverage }}).toFixed(2);
-        inputElement.value ={{ car.damage_coverage }};
+        document.getElementById("insurance-amount").innerText = ({{ car.damage_coverage }}*day) + "$";
+        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + ({{ car.damage_coverage }}* day)).toFixed(2);
+        inputElement.value ={{ car.damage_coverage }} * day;
       } else {
         document.getElementById("insurance-amount").innerText = 0 + "$";
         document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}}).toFixed(2);

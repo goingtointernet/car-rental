@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Brand, Product, Subcategory, Review,CustomDiscount
+from .models import Category, Brand, Product, Subcategory, Review,CustomDiscount, AvaibleTiming, PickupLocation
 # Category
 admin.site.register(Category)
 # SubCategory
@@ -8,6 +8,10 @@ admin.site.register(Subcategory)
 admin.site.register(Brand)
 #Review
 admin.site.register(Review)
+#AvaibleTiming
+admin.site.register(AvaibleTiming)
+admin.site.register(PickupLocation)
+PickupLocation
 #Product
 @admin.register(Product)
 class ProductModelAdmin(admin.ModelAdmin):
