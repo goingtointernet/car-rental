@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-r12kw!noxtt%r%3b-i7z9*@yxq8ww+ghm2%7=+y8yt_^ue$$&p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -133,10 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Add Static Manually
 import os
-if DEBUG:
-  STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-else:
-  STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_ROOT = Path.joinpath(BASE_DIR,'media')
 MEDIA_URL = '/media/'
@@ -149,8 +146,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'touseeqijazpro1@gmail.com'
-EMAIL_HOST_PASSWORD = 'ozklnikdyqtqqplj'
+EMAIL_HOST_USER = 'Info@burrrentals.com'
+EMAIL_HOST_PASSWORD = 'drbarkvadwaedmgx'
 
 
 # settings.py
