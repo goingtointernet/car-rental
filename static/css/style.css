@@ -554,6 +554,7 @@ header {
     left: 70%;
     top: calc(100% + 10px);
     transform: translateX(-70%);
+    z-index: 100;
 }
 
 .user-drop-menu:after {
