@@ -18,6 +18,8 @@ class PatreonImage(models.Model):
 class SiteData(models.Model):
     email = models.CharField(max_length=160, default="")
     phone =models.IntegerField(default=123456789)
+    logo = models.ImageField(upload_to='logo',blank=True, null=True)
+    favicon = models.ImageField(upload_to='logo',blank=True, null=True)
     facebook = models.CharField(max_length=160,  default="", blank=True, null=True)
     instagram = models.CharField(max_length=160,  default="", blank=True, null=True)
     twitter = models.CharField(max_length=160,default="", blank=True, null=True)

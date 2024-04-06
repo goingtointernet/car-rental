@@ -15,9 +15,12 @@
       type="text/css"
       href="{% static 'css/style.css' %}" />
 
-    <!--==Fav-icon=========================================================-->
-    <link rel="shortcut icon" href="{% static 'images/base/fav-icon.webp' %}" />
-
+    {% if sitedata.logo %}
+      <link rel="shortcut icon" href="{{sitedata.logo.url}}" />
+    {% else %}
+      <link rel="shortcut icon" href="{% static 'images/base/fav-icon.png' %}" />
+    {% endif %}
+    
     <!--==Using-Font-Awesome-for-Icons=====================================-->
     <script
       src="https://kit.fontawesome.com/6bd6c771de.js"
@@ -49,7 +52,11 @@
       <section id="login">
         <!--**logo***********-->
         <a href="{% url 'index' %}" class="logo">
+          {% if sitedata.logo %}
+          <img src="{{sitedata.logo.url}}" alt="Burr Rentals LLC" />
+          {% else %}
           <img src="{% static 'images/logo.png' %}" alt="Burr Rentals LLC" />
+         {% endif %}
         </a>
 
         <fieldset>

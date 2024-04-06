@@ -3798,7 +3798,6 @@ table.summary-total:last-of-type {
     height: 100%;
     object-fit: contain;
     object-position: center;
-    filter: brightness(0);
 }
 
 /*==recent-product==============================*/

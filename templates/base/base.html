@@ -15,7 +15,12 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
 
     <!--==Fav-icon=========================================================-->
-    <link rel="shortcut icon" href="{% static 'images/base/fav-icon.png' %}" />
+    {% if sitedata.logo %}
+        <link rel="shortcut icon" href="{{sitedata.logo.url}}" />
+    {% else %}
+        <link rel="shortcut icon" href="{% static 'images/base/fav-icon.png' %}" />
+    {% endif %}
+    
     {% comment %}
     <link rel="stylesheet" type="text/css" href="{% static " css/slick.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static " css/select2.min.css" %}">
@@ -88,13 +93,18 @@
             </label>
             <!--**logo***********-->
             <a href="{% url 'index' %}" class="logo">
-               <img src="{% static 'images/logo.png' %}" alt="Burr Rentals LLC" />
+               {% if sitedata.logo %}
+                <img src="{{sitedata.logo.url}}" alt="Burr Rentals LLC" />
+                {% else %}
+                <img src="{% static 'images/logo.png' %}" alt="Burr Rentals LLC" />
+               {% endif %}
             </a>
             <!--**menu***********-->
             <ul class="menu">
                 <li><a href="{% url 'index' %}">Home</a></li>
-                <li><a href="/about-us">About Me</a></li>
+                <li><a href="/about-us">About Us</a></li>
                 <li><a href="/contact">Contact</a></li>
+                <li><a href="/faqs">Faqs</a></li>
                 <li><a href="/search?search="><i class="fa-solid fa-magnifying-glass"></i></a></li>
             </ul>
             <!--card-and-login-->
@@ -157,6 +167,7 @@
                         <li style="text-transform: none;"><a href="{{staticposts.slug}}"
                                 class="active">{{staticposts.page_name}}</a></li>
                         {% endfor %}
+                        <li><a href="/faqs">Faqs</a></li>
                     </ul>
                 </div>
 
