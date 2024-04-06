@@ -15,8 +15,8 @@
       type="text/css"
       href="{% static 'css/style.css' %}" />
 
-    {% if sitedata.logo %}
-      <link rel="shortcut icon" href="{{sitedata.logo.url}}" />
+    {% if sitedata.favicon %}
+      <link rel="shortcut icon" href="{{sitedata.favicon.url}}" />
     {% else %}
       <link rel="shortcut icon" href="{% static 'images/base/fav-icon.png' %}" />
     {% endif %}
