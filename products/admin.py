@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Brand, Product, Subcategory, Review,CustomDiscount, AvaibleTiming, PickupLocation
+from .models import Category, Brand, Product, Subcategory, Review,CustomDiscount, AvaibleTiming, PickupLocation, ProductImages
 # Category
 admin.site.register(Category)
 # SubCategory
@@ -20,3 +20,5 @@ class ProductModelAdmin(admin.ModelAdmin):
 @admin.register(CustomDiscount)
 class CustomDiscountModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'discount_price','discount_valid_days', 'created_at']
+
+admin.site.register(ProductImages)

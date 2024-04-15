@@ -41,7 +41,10 @@ class PickupLocation(models.Model):
     location = models.CharField(max_length=160, unique= True, default="")
     def __str__(self):
         return self.location
-    
+
+class ProductImages(models.Model):
+    image = models.ImageField(upload_to='product_img')
+
 # Product
 class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
@@ -54,7 +57,8 @@ class Product(models.Model):
     seats = models.FloatField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
-    product_img = models.ImageField(upload_to='product_img')
+    product_thumb = models.ImageField(upload_to='product_img')
+    product_images = models.ManyToManyField(ProductImages, null = True)
     instructions = models.CharField(max_length=300, default="")
     features = models.CharField(max_length=500, default="")
     pro_tips = models.CharField(max_length=500)
@@ -100,6 +104,7 @@ class Review(models.Model):
     rating = models.IntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 
 class CustomDiscount(models.Model):
