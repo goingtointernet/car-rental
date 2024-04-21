@@ -83,8 +83,10 @@
             <div class="popup-content">
                 <label for="buy-car-btn">X</label>
                 <p>*For Buy {{product.title}}, Please contact to the seller. Here is the contact details given bellow:</p>
-                <div><strong>Seller Name:</strong>{{product.user.email}}</div>
-                <div><strong>Seller Email</strong>{{product.user.email}}</div>
+                <div class="buying_price_box"><strong>*Buying Prince:</strong>${{product.selling_price}}</div>
+                <div><strong>Seller Name:</strong>{{product.user.first_name}} {{product.user.last_name}}</div>
+                <div><strong>Seller Email:</strong>{{product.user.email}}</div>
+                <div><strong>Seller Phone No:</strong>{{product.user.phone}}</div>
             </div>
         </div>
 

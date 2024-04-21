@@ -4253,6 +4253,13 @@ table.summary-total.summary-total-last {
     margin-top: 10px;
     border-radius: 5px;
 }
+#buy-car-btn{
+    display: none;
+}
 #buy-car-btn:checked ~ .popup-product-container{
     display: flex;
+}
+.popup-content div.buying_price_box{
+    background-color: #ffffff;
+    color: #f81818;
 }
