@@ -57,7 +57,7 @@
                 <strong class="product-category"><i class="fa-solid fa-city"></i> City - {{product.city}}</strong>
                 <strong class="product-category"><i class="fa-solid fa-chair"></i> Seats - {{product.seats}}</strong>
                 <strong class="product-category"><i class="fa-solid fa-location-dot"></i> Location - {{product.complete_location}}</strong>
-                <strong class="product-category"><i class="fa-solid fa-car"></i> Buy Price - ${{product.selling_price}}</strong>
+                <strong class="product-category"><i class="fa-solid fa-car"></i> Buying Price - ${{product.selling_price}}</strong>
             </div>
             <!--price-->
             <span class="price">${{product.rent_per_day_price}}<sub style="font-size:10px; font-weight:400;">/per day</sub> <del id="total-with-discount-price">0$</del></span>
@@ -72,8 +72,20 @@
 
                     <div class="quantity-cart">
 
-                        <a href="{% url 'index' %}cart/booking/{{product.id}}" class="add-cart">Book Now</a>
+                        <a href="{% url 'index' %}cart/booking/{{product.id}}" class="add-cart">Book For Rent</a>
+                        <label for="buy-car-btn" class="add-cart buy-car-btn">Buy Car</label>
             </form>
+        </div>
+
+        <input type="checkbox" id="buy-car-btn" />
+
+        <div class="popup-product-container">
+            <div class="popup-content">
+                <label for="buy-car-btn">X</label>
+                <p>*For Buy {{product.title}}, Please contact to the seller. Here is the contact details given bellow:</p>
+                <div><strong>Seller Name:</strong>{{product.user.email}}</div>
+                <div><strong>Seller Email</strong>{{product.user.email}}</div>
+            </div>
         </div>
 
 
