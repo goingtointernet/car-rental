@@ -15,10 +15,10 @@ PickupLocation
 #Product
 @admin.register(Product)
 class ProductModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title','brand','category','sub_category','selling_price','discounted_price']
+    list_display = ['id', 'title','brand','category','sub_category','selling_price','rent_per_day_price']
 #Rental
 @admin.register(CustomDiscount)
 class CustomDiscountModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'discount_price','discount_valid_days', 'created_at']
+    list_display = ['id', 'discount_price_percentage','discount_valid_days', 'created_at']
 
 admin.site.register(ProductImages)

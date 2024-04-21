@@ -9,4 +9,5 @@ urlpatterns = [
     path('order',views.order, name='order'),
     path('',views.shop_cart, name='shop_cart'),
     path('save_booking/', views.save_booking, name='save_booking'),
+    path('apply-coupon', views.apply_coupon, name='apply_coupon'), 
     ] 

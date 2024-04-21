@@ -51,7 +51,7 @@ class Product(models.Model):
     title = models.CharField(max_length=160)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     selling_price = models.FloatField()
-    discounted_price = models.FloatField()
+    rent_per_day_price = models.FloatField()
     total_tax = models.FloatField(default=0)
     description = models.TextField()
     seats = models.FloatField(default=0)
@@ -109,6 +109,6 @@ class Review(models.Model):
 
 class CustomDiscount(models.Model):
     # your existing fields
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_price_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount_valid_days = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

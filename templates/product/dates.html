@@ -91,7 +91,9 @@
       <input type="hidden" name="car_id" value="{{car.id}}">
       <input type="hidden" name="car_address" value="{{car.complete_location}}">
       <input type="hidden" name="user_address" value="{{user.address}}">
-      <input type="hidden" id="input_insurance_amount" name="insurance_amount" value="{{ car.supplemental_liability_coverage }}">
+      <input type="hidden" id="input_insurance_amount" name="insurance_amount" value="0">
+      <input type="hidden" id="coupon_input" name="coupon" value="None">
+      <input type="hidden" id="discount_input" name="discount_percentage" value="{{ globalDiscount.discount_price_percentage }}">
       
     </div>
   </div>
@@ -108,7 +110,7 @@
           <tr>
             <td>Per Day Amount</td>
             <td class="summary-tabel-amount" id="per-day-amount">
-              {{car.selling_price}}$
+              {{car.rent_per_day_price}}$
             </td>
           </tr>
           <tr>
@@ -118,22 +120,22 @@
             </td>
           </tr>
           <tr>
-            <td>Tax</td>
-            <td class="summary-tabel-amount" id="t">
+            <td>Total Tax</td>
+            <td class="summary-tabel-amount" id="summary_tax">
               {{ car.total_tax}}$
             </td>
           </tr>
           <tr>
-            <td>Insurance</td>
+            <td>Total Insurance</td>
             <td class="summary-tabel-amount" id="insurance-amount">
               0$
             </td>
           </tr>
-          {% if globalDiscount.discount_price %}
+          {% if globalDiscount.discount_price_percentage %}
           <tr>
-            <td>Discount</td>
-            <td class="summary-tabel-amount">
-              {{globalDiscount.discount_price|floatformat:2}}$
+            <td style="color:red">Discount</td>
+            <td style="color:red" class="summary-tabel-amount" id="summary-discount">
+              {{ globalDiscount.discount_price_percentage }}%
             </td>
           </tr>
           {% endif %}
@@ -146,13 +148,32 @@
             </td>
           </tr>
         </table>
-        <span>*Including Shipping</span>
+        <span>*Including Tax</span>
       </div>
-     <button type="submit" class="cart-place-order-btn">Ready To Pay</button>
+
+      <span class="coupon-heading">Do you have a coupon?</span>
+      <form id="apply-coupon-form" method="post">
+        {% csrf_token %}
+        <div id="coupon-form">
+        <input type="text" id="coupon-code" name="coupon_code" placeholder="Enter coupon code">
+        <button type="button" id="apply-coupon-btn">Apply</button>
+        </div>
+      </form>
+    <div id="coupon-message"></div>
+
+    <div class="custom_deposite_check">
+          <input type="checkbox" id="custom_deposite_check" name="custom_deposite_check">
+          <label for="custom_deposite_check">Add Custom Deposite</label>
+ 
+    <input type="Number" id="custom_deposite_input" value="100" min="100" placeholder="Enter Amount" name="custom_deposite_input">
+  </div> 
+    <button type="submit" class="cart-place-order-btn">Ready To Pay</button>
     </div>
   </div>
 
   </form>
+
+        
 </section>
 
 <!-- Your HTML template -->
@@ -160,6 +181,8 @@
 
 {% block p_script %}
 <!-- Initialize flatpickr on the pickup_date input -->
+<script src="{% static 'js/Jquery.js' %}" type="text/javascript"></script>
+
 <script>
   flatpickr("#id_pickup_dropoff_date", {
     mode:"range",
@@ -167,9 +190,10 @@
     minDate: "today",
     enable: {{ available_dates|safe }},
     });
+    let discountPercentage = {{globalDiscount.discount_price_percentage}};
     let day = 0;
     var inputElement = document.getElementById("input_insurance_amount");
-
+    console.log(discountPercentage,"discountPercentage")
     getFormValues();
     function getFormValues() {
         // Retrieve the values using JavaScript
@@ -188,12 +212,14 @@
 
         // Do something with the calculated value (e.g., log or alert)
         document.getElementById("summary-days").innerText = daysDiff||0;
-        // document.getElementById("total-amount").innerText = ({{ car.selling_price }} * (daysDiff)).toFixed(2) + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * (daysDiff)) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + 0)||0;
-        inputElement.value ={{ car.supplemental_liability_coverage }};
+        // document.getElementById("total-amount").innerText = ({{ car.rent_per_day_price }} * (daysDiff)).toFixed(2) + "$";
+        document.getElementById("subtotal-amount").innerText = (((({{ car.rent_per_day_price }} + {{ car.total_tax }}) * (daysDiff))*((100 - discountPercentage)/100)) + 0)||0;
+        inputElement.value =0;
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
+
+        document.getElementById("summary_tax").innerText = {{ car.total_tax}}*(daysDiff||0) + "$";
 
         resetCheckboxes();
     }
@@ -208,16 +234,19 @@
 
       if(checkboxId == "supplemental_liability_coverage"){
         document.getElementById("insurance-amount").innerText = ({{ car.supplemental_liability_coverage }}*day) + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + ({{ car.supplemental_liability_coverage }} * day)).toFixed(2);
+        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }} + {{ car.supplemental_liability_coverage }})*day)
+        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value = {{ car.supplemental_liability_coverage }} * day;
       }
       else if (checkboxId == "damage_coverage") {
         document.getElementById("insurance-amount").innerText = ({{ car.damage_coverage }}*day) + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}} + ({{ car.damage_coverage }}* day)).toFixed(2);
+        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }} + {{ car.damage_coverage }})*day);
+        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value ={{ car.damage_coverage }} * day;
       } else {
         document.getElementById("insurance-amount").innerText = 0 + "$";
-        document.getElementById("subtotal-amount").innerText = (({{ car.selling_price }} * day) + {{ car.total_tax }} - {{globalDiscount.discount_price}}).toFixed(2);
+        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }})*day)
+        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value =0;
       }
       
@@ -233,6 +262,43 @@
 
     // Call the reset function when the page loads
     window.onload = resetCheckboxes;
+
+
+
+    /*==Apply Coupon================*/
+$('#apply-coupon-btn').click(function(){
+  var couponCode = $('#coupon-code').val();
+  $.ajax({
+      type: "POST",
+      url: "{% url 'apply_coupon' %}",
+      data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          coupon_code: couponCode,
+          booking_id: couponCode
+      },
+      success: function (data){
+          if (data.success) {
+              // Update the total amount displayed on the page
+              document.getElementById("coupon-message").innerText = "*"+data.message;
+              document.getElementById("summary-discount").innerText= data.discountPercentage + "$"
+              discountPercentage = data.discountPercentage
+              getFormValues();
+              let discountinput = document.getElementById("discount_input");
+              let couponinput = document.getElementById("coupon_input");
+              couponinput.value = couponCode;
+              discountinput.value = data.discountPercentage;
+          } else {
+              // Invalid coupon code
+              alert(data.message);
+          }
+      },
+      error: function(xhr, status, error) {
+          alert("An error occurred while applying the coupon. Please try again.");
+          console.log(xhr.responseText);
+      }
+  });
+});
+
 </script>
 
 

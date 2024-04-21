@@ -69,7 +69,7 @@
           <tr>
             <td>Per Day Rent</td>
             <td class="summary-tabel-amount">
-              {{booking_car_details.car.selling_price|floatformat:2}}$
+              {{booking_car_details.car.rent_per_day_price|floatformat:2}}$
             </td>
           </tr>
           <tr>
@@ -81,7 +81,7 @@
           <tr>
             <td>Total Taxes</td>
             <td class="summary-tabel-amount">
-              {{booking_car_details.car.total_tax|floatformat:2}}$
+              {{ total_tax | floatformat:2 }}$
             </td>
           </tr>
           <tr>
@@ -90,16 +90,16 @@
               {{booking_car_details.insurance_amount|floatformat:2}}$
             </td>
           </tr>
-          {% if globalDiscount.discount_price %}
+          {% if booking_car_details.discount_percentage %}
           <tr>
             <td>Discount</td>
             <td class="summary-tabel-amount">
-              {{globalDiscount.discount_price|floatformat:2}}$
+              {{booking_car_details.discount_percentage|floatformat:2}}%
             </td>
           </tr>
           {% endif %}
         </table>
-        <table class="summary-total">
+        <table class="summary-total summary-total-last">
           <tr>
             <td class="summary-subtotal-h">SubTotal Amount</td>
             <td class="summary-tabel-subamount">
@@ -107,6 +107,24 @@
             </td>
           </tr>
         </table>
+
+        {% if booking_car_details.custom_deposit %}
+        <table class="deposite-total">
+          <tr>
+            <td class="summary-subtotal-h">Custom Deposite</td>
+            <td class="summary-tabel-subamount">
+              ${{booking_car_details.custom_deposit|floatformat:2}}
+            </td>
+          </tr>
+
+          <tr>
+            <td class="summary-subtotal-h">Remaining Amount</td>
+            <td class="summary-tabel-subamount">
+              ${{remaining_amount|floatformat:2}}
+            </td>
+          </tr>
+        </table>
+        {% endif %}
         <span>*Including Taxes</span>
       </div>
 
@@ -169,7 +187,7 @@
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
-  const stripe = Stripe('pk_live_51OWj5oILDq4NxNQl2rkVSbkhXSxWtOM48bSn4axwiKq54m3gCfuIIF2y9oG7cpOwYT12DZc7uwrS9GnGpct9vmoj00OMuVzdSh');
+  const stripe = Stripe('pk_test_51Ihx5CG55bESLD2qBId2n1uYJUHG9IvonKI9SZCvWV3W3g5YPHQQhKXeMkXxX3gGQlJBT58UVSTwZhhlOv8SteCM00a12IFqs8');
   function getCookie(name) {
     let value = "; " + document.cookie;
     let parts = value.split("; " + name + "=");
@@ -185,7 +203,11 @@
         "X-CSRFToken": csrftoken,
         // Add any other headers here
       },
-      body: JSON.stringify({ amount: {{total_amount|floatformat:2}} , booking_id:{{booking_car_details.id}}})
+      {% if booking_car_details.custom_deposit %}
+        body: JSON.stringify({ amount: {{booking_car_details.custom_deposit|floatformat:2}} , booking_id:{{booking_car_details.id}}})
+      {% else %}
+        body: JSON.stringify({ amount: {{total_amount|floatformat:2}} , booking_id:{{booking_car_details.id}}})
+      {% endif %}
       })
       .then(response => {
         if (!response.ok) {

@@ -20,7 +20,10 @@ class Cart(models.Model):
     user_phone = models.IntegerField(default = 123456789, null=True)
     user_address = models.CharField(max_length=200, default="None", null=True)
     insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    coupon = models.CharField(max_length=100, default="None", null=True)
     custom_deposit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     order_price = models.FloatField(default=0 , null=True)
     remaning_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -53,9 +56,24 @@ class Booking(models.Model):
     user_phone = models.IntegerField(default = 123456789, null=True)
     user_address = models.CharField(max_length=200, default="None", null=True)
     insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     custom_deposit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    coupon = models.CharField(max_length=100, default="None", null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     user_pay = models.FloatField(default=0 , null=True)
     remaning_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     order_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=150, choices=BOOKING_STATUS, default="Pending")
+
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.code

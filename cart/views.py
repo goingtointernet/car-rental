@@ -2,15 +2,14 @@ from unicodedata import name
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from numpy import product
-from cart.models import Cart, Booking
+from cart.models import Cart, Booking, Coupon
 from products.models import CustomDiscount
 from products.models import Product
 from django.db.models import Q
 from account.models import User
 from account.forms import EditUserAddressForm
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 import stripe
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -18,6 +17,8 @@ import json
 from datetime import date, timedelta, datetime
 from django.shortcuts import get_object_or_404
 stripe.api_key = settings.STRIPE_SECRET_KEY
+from django.utils import timezone
+from decimal import Decimal
 
 def create_checkout_session(request):
     data = json.loads(request.body)
@@ -64,15 +65,25 @@ def checkout(request, cart_id):
         booking_car_details= Cart.objects.get(id=cart_id)
         total_amount = booking_car_details.order_price
         amount =booking_car_details.order_price
+        remaining_amount = 0
+        if booking_car_details.custom_deposit:
+                remaining_amount = total_amount - int(booking_car_details.custom_deposit)
+
         summary_shipping = 0.0
         summary_amount = booking_car_details.order_price
-        return render(request, 'product/checkout.html',{'booking_car_details':booking_car_details, 'total_amount':total_amount, 'summary_amount':summary_amount, 'summary_shipping':summary_shipping })
+        total_tax = booking_car_details.car.total_tax * booking_car_details.rent_days
+        return render(request, 'product/checkout.html',{'booking_car_details':booking_car_details, 'total_amount':total_amount, 'summary_amount':summary_amount, 'summary_shipping':summary_shipping, 'total_tax':total_tax, 'remaining_amount':remaining_amount })
 
 #====order================#
 @login_required
 def payment_done(request, cart_id):
     try:
         cart = get_object_or_404(Cart, id=cart_id)
+        user_pay = 0
+        if cart.custom_deposit:
+            user_pay = cart.custom_deposit
+        else:
+            user_pay = cart.total_amount
         # Update the order_status to 'active'
         booking = Booking(
                 user=request.user,
@@ -86,11 +97,16 @@ def payment_done(request, cart_id):
                 seller_car_location=cart.seller_car_location,
                 rent_days=cart.rent_days, 
                 insurance_amount = cart.insurance_amount,
+                total_tax_amount=cart.total_tax_amount,
                 total_amount=cart.total_amount, 
+                custom_deposit=cart.custom_deposit,
+                discount_percentage=cart.discount_percentage,
+                coupon=cart.coupon,
                 user_name=cart.user_name,
                 user_phone=cart.user_phone,
                 user_address=cart.user_address,
-                user_pay=cart.total_amount, 
+                user_pay=user_pay, 
+                remaning_amount=cart.remaning_amount,
             )
         booking.save()
         cart_booking = Cart.objects.filter(user=request.user)
@@ -179,13 +195,18 @@ def save_booking(request):
             car_location = request.POST['car_address']
             user_address = request.POST['user_address']
             insurance_amount = request.POST['insurance_amount']
-            print(insurance_amount, "ins")
+            discount_percentage = request.POST['discount_percentage']
+            coupon = request.POST['coupon']
+            try:
+                custom_deposite_check = request.POST['custom_deposite_check']
+            except KeyError:
+                custom_deposite_check = False
+            custom_deposite_input = request.POST['custom_deposite_input']
+            custom_deposite = 0
+            if custom_deposite_check and int(custom_deposite_input) >= 100:
+                custom_deposite = custom_deposite_input
+
             required_fields = [pickup_dropoff_date, name, pickup_time, dropoff_time, pickup_location, city, phone, car_id]
-            custom_discounts = CustomDiscount.objects.all()
-            if custom_discounts.exists():
-                global_discount = custom_discounts[0]
-            else:
-                global_discount = 0
             
             if None in required_fields or '' in required_fields:
                 return redirect('car_booking',car_id)
@@ -216,6 +237,12 @@ def save_booking(request):
                 rental_days = 1
 
             car_instance = Product.objects.get(id=car_id)
+            total_amount = (((car_instance.rent_per_day_price + car_instance.total_tax) * rental_days) + int(insurance_amount) ) * ((100 - float(discount_percentage)) / 100)
+            print(total_amount,"total_amount")
+
+            remaning_amount = 0
+            if custom_deposite:
+                remaning_amount = total_amount - int(custom_deposite)
 
             cart = Cart(
                 user=request.user,
@@ -228,12 +255,17 @@ def save_booking(request):
                 city=city,
                 seller_car_location=car_location,
                 rent_days=rental_days, 
-                total_amount=car_instance.selling_price*rental_days+car_instance.total_tax - int(global_discount.discount_price) + int(insurance_amount), 
+                discount_percentage=discount_percentage,
+                coupon=coupon,
+                total_amount = int(total_amount),
                 user_name=name,
                 insurance_amount = insurance_amount,
+                total_tax_amount=car_instance.total_tax * rental_days,
                 user_phone=phone,
                 user_address=user_address,
-                order_price=car_instance.selling_price*rental_days+car_instance.total_tax - int(global_discount.discount_price) + int(insurance_amount), 
+                custom_deposit=custom_deposite,
+                order_price=int(total_amount), 
+                remaning_amount=remaning_amount,
             )
             cart.save()
             return redirect('checkout',cart.id)
@@ -241,4 +273,19 @@ def save_booking(request):
         else:
             return redirect('car_booking',car_id)
     except ValueError as e:
+        print(e)
         return redirect('car_booking',car_id)
+    
+
+
+
+@require_POST
+@login_required
+def apply_coupon(request):
+    coupon_code = request.POST.get('coupon_code')
+    try:
+        coupon = Coupon.objects.get(code=coupon_code, active=True, valid_from__lte=timezone.now(), valid_to__gte=timezone.now())
+        # Update the total amount based on the coupon application
+        return JsonResponse({'success': True, 'message': 'Coupon applied successfully!','discountPercentage':coupon.discount_percentage})
+    except Coupon.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Invalid coupon code or coupon expired.'})
