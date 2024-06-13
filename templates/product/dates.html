@@ -213,13 +213,13 @@
         // Do something with the calculated value (e.g., log or alert)
         document.getElementById("summary-days").innerText = daysDiff||0;
         // document.getElementById("total-amount").innerText = ({{ car.rent_per_day_price }} * (daysDiff)).toFixed(2) + "$";
-        document.getElementById("subtotal-amount").innerText = (((({{ car.rent_per_day_price }} + {{ car.total_tax }}) * (daysDiff))*((100 - discountPercentage)/100)) + 0)||0;
+        document.getElementById("subtotal-amount").innerText = ((((({{ car.rent_per_day_price }}*(daysDiff)) + (({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100))))*((100 - discountPercentage)/100)) + 0)||0;
         inputElement.value =0;
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
 
-        document.getElementById("summary_tax").innerText = {{ car.total_tax}}*(daysDiff||0) + "$";
+        document.getElementById("summary_tax").innerText =({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100) + "$";
 
         resetCheckboxes();
     }
@@ -234,18 +234,18 @@
 
       if(checkboxId == "supplemental_liability_coverage"){
         document.getElementById("insurance-amount").innerText = ({{ car.supplemental_liability_coverage }}*day) + "$";
-        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }} + {{ car.supplemental_liability_coverage }})*day)
+        let totalamount = (({{ car.rent_per_day_price }} + {{ car.supplemental_liability_coverage }})*day + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100))
         document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value = {{ car.supplemental_liability_coverage }} * day;
       }
       else if (checkboxId == "damage_coverage") {
         document.getElementById("insurance-amount").innerText = ({{ car.damage_coverage }}*day) + "$";
-        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }} + {{ car.damage_coverage }})*day);
+        let totalamount = (({{ car.rent_per_day_price }} + {{ car.damage_coverage }})*day) + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100);
         document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value ={{ car.damage_coverage }} * day;
       } else {
         document.getElementById("insurance-amount").innerText = 0 + "$";
-        let totalamount = (({{ car.rent_per_day_price }} + {{ car.total_tax }})*day)
+        let totalamount = (({{ car.rent_per_day_price }})*day) + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100)
         document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
         inputElement.value =0;
       }
