@@ -152,7 +152,17 @@ def get_available_dates(car_id, pickup_date, dropoff_date):
 def car_booking(request, car_id):
     try:
         all_bookings = Booking.objects.filter(car_id=car_id)
-        print(all_bookings)
+        product = get_object_or_404(Product, id=car_id)
+        try:
+            custom_discount = CustomDiscount.objects.get(
+                valid_cars=product,
+                active=True,
+                valid_from__lte=timezone.now(),
+                valid_to__gte=timezone.now()
+            )
+        except CustomDiscount.DoesNotExist:
+            custom_discount = None
+        print(custom_discount)
         car = Product.objects.get(id=car_id)
         # Assuming you want to consider the pickup and dropoff dates of the first booking
         if all_bookings:
@@ -173,7 +183,7 @@ def car_booking(request, car_id):
 
             # Calculate available dates
         available_dates = get_available_dates(car_id, pickup_date, dropoff_date)
-        return render(request, 'product/dates.html', {'available_dates': available_dates, "car":car})
+        return render(request, 'product/dates.html', {'available_dates': available_dates, "car":car, 'custom_discount':custom_discount})
     except Exception as e:
         print(e)
         return render(request, 'home/404.html')
@@ -197,13 +207,10 @@ def save_booking(request):
             insurance_amount = request.POST['insurance_amount']
             discount_percentage = request.POST['discount_percentage']
             coupon = request.POST['coupon']
-            try:
-                custom_deposite_check = request.POST['custom_deposite_check']
-            except KeyError:
-                custom_deposite_check = False
+            custom_deposite_check = True
             custom_deposite_input = request.POST['custom_deposite_input']
             custom_deposite = 0
-            if custom_deposite_check and int(custom_deposite_input) >= 100:
+            if custom_deposite_check and int(custom_deposite_input) >= 1:
                 custom_deposite = custom_deposite_input
 
             required_fields = [pickup_dropoff_date, name, pickup_time, dropoff_time, pickup_location, city, phone, car_id]

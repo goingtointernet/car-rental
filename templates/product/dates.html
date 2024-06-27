@@ -77,24 +77,17 @@
         <label>Your Phone</label>
         <input name="phone" type="tell" placeholder="Phone Number" required>
       </div>
-      <div class="booking-form-box">
-        <label>Insurance</label>
-        <div class="insurance_box_container">
-          <input type="checkbox" id="own_insurance" name="own_insurance" checked>
-          <label for="own_insurance" class="own_insurance insurance_box" onclick="uncheckAllExcept('own_insurance')" >Use Own Insurance</label>
-          <input type="checkbox" id="supplemental_liability_coverage" name="supplemental_liability_coverage">
-          <label for="supplemental_liability_coverage" class="supplemental_liability_coverage insurance_box" onclick="uncheckAllExcept('supplemental_liability_coverage')">Supplemental Liability Coverage</label>
-          <input type="checkbox" id="damage_coverage" name="damage_coverage">
-          <label for="damage_coverage" class="damage_coverage insurance_box" onclick="uncheckAllExcept('damage_coverage')">Damage Coverage</label>
-        </div>
-      </div>
       <input type="hidden" name="car_id" value="{{car.id}}">
       <input type="hidden" name="car_address" value="{{car.complete_location}}">
       <input type="hidden" name="user_address" value="{{user.address}}">
       <input type="hidden" id="input_insurance_amount" name="insurance_amount" value="0">
       <input type="hidden" id="coupon_input" name="coupon" value="None">
-      <input type="hidden" id="discount_input" name="discount_percentage" value="{{ globalDiscount.discount_price_percentage }}">
-      
+      {% if custom_discount.discount_price_percentage %}
+      <input type="hidden" id="discount_input" name="discount_percentage" value="{{ custom_discount.discount_price_percentage}}">
+      {% else %}
+      <input type="hidden" id="discount_input" name="discount_percentage" value="0">
+      {% endif %}
+      <input type="hidden" id="custom_deposite_input" value="0" name="custom_deposite_input">
     </div>
   </div>
 
@@ -126,19 +119,22 @@
             </td>
           </tr>
           <tr>
-            <td>Total Insurance</td>
+            <td>{{car.insurance_name}} Insurance</td>
             <td class="summary-tabel-amount" id="insurance-amount">
               0$
             </td>
           </tr>
-          {% if globalDiscount.discount_price_percentage %}
-          <tr>
+          
+          <tr style="{% if custom_discount.discount_price_percentage %} display:table-row; {% else %} display:none; {% endif %}" id="discount_summary">
             <td style="color:red">Discount</td>
-            <td style="color:red" class="summary-tabel-amount" id="summary-discount">
-              {{ globalDiscount.discount_price_percentage }}%
+            <td style="color:red;" class="summary-tabel-amount" id="summary-discount">
+              {% if custom_discount.discount_price_percentage %}
+                {{ custom_discount.discount_price_percentage }}%
+              {% else %}
+                0%
+              {% endif %}
             </td>
           </tr>
-          {% endif %}
         </table>
         <table class="summary-total">
           <tr>
@@ -147,6 +143,14 @@
               $<span id="subtotal-amount" style="color: #333333">0</span>
             </td>
           </tr>
+          {% if car.custom_deposite_percentage > 0 %}
+          <tr>
+            <td class="summary-subtotal-h">Custom Deposite</td>
+            <td class="summary-tabel-subamount">
+              $<span id="custome-amount" style="color: #333333">0</span>
+            </td>
+          </tr>
+          {% endif %}
         </table>
         <span>*Including Tax</span>
       </div>
@@ -160,13 +164,6 @@
         </div>
       </form>
     <div id="coupon-message"></div>
-
-    <div class="custom_deposite_check">
-          <input type="checkbox" id="custom_deposite_check" name="custom_deposite_check">
-          <label for="custom_deposite_check">Add Custom Deposite</label>
- 
-    <input type="Number" id="custom_deposite_input" value="100" min="100" placeholder="Enter Amount" name="custom_deposite_input">
-  </div> 
     <button type="submit" class="cart-place-order-btn">Ready To Pay</button>
     </div>
   </div>
@@ -190,12 +187,16 @@
     minDate: "today",
     enable: {{ available_dates|safe }},
     });
-    let discountPercentage = {{globalDiscount.discount_price_percentage}};
+    {% if custom_discount.discount_price_percentage %}
+    let discountPercentage = {{custom_discount.discount_price_percentage}};
+    {% else %}
+    let discountPercentage = 0;
+    {% endif %}
     let day = 0;
     var inputElement = document.getElementById("input_insurance_amount");
     console.log(discountPercentage,"discountPercentage")
     getFormValues();
-    function getFormValues() {
+    function getFormValues(couponCheck) {
         // Retrieve the values using JavaScript
         var dateRange = document.getElementById('id_pickup_dropoff_date').value.split(" to ");
         var pickupDateStr = dateRange[0];
@@ -210,47 +211,40 @@
         var daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
         day = daysDiff
 
+        if (!couponCheck) {
+        {% if custom_discount.seven_day_booking_discount_percentage %}
+        if (day >= 7) {
+          discountPercentage = {{custom_discount.seven_day_booking_discount_percentage}}
+          document.getElementById("summary-discount").innerText = {{custom_discount.seven_day_booking_discount_percentage}} + '%';
+        } else if (day < 7){
+          discountPercentage = {{custom_discount.discount_price_percentage}}
+          document.getElementById("summary-discount").innerText = {{custom_discount.discount_price_percentage}} + '%';
+        }
+        {% endif %}
+      }
+
         // Do something with the calculated value (e.g., log or alert)
         document.getElementById("summary-days").innerText = daysDiff||0;
         // document.getElementById("total-amount").innerText = ({{ car.rent_per_day_price }} * (daysDiff)).toFixed(2) + "$";
-        document.getElementById("subtotal-amount").innerText = ((((({{ car.rent_per_day_price }}*(daysDiff)) + (({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100))))*((100 - discountPercentage)/100)) + 0)||0;
+        let subtotal_amount = ((((({{ car.rent_per_day_price }}*(daysDiff)) + ({{car.insurance_amount_per_day}}*(daysDiff||0)) + (({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100))))*((100 - discountPercentage)/100)) + 0)||0;
+        document.getElementById("subtotal-amount").innerText = subtotal_amount;
         inputElement.value =0;
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
 
         document.getElementById("summary_tax").innerText =({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100) + "$";
-
+        document.getElementById("insurance-amount").innerText =({{car.insurance_amount_per_day}}*(daysDiff||0)) + "$";
+        let insurance_input = document.getElementById("input_insurance_amount");
+        insurance_input.value = ({{car.insurance_amount_per_day}}*(daysDiff||0));
+        
+        {% if car.custom_deposite_percentage %}
+          let custom_deposite = document.getElementById("custom_deposite_input");
+          custom_deposite.value = subtotal_amount * {{car.custom_deposite_percentage}}/100;
+          document.getElementById("custome-amount").innerText = subtotal_amount * {{car.custom_deposite_percentage}}/100;
+        {% endif %}
         resetCheckboxes();
     }
-
-    function uncheckAllExcept(checkboxId) {
-      var checkboxes = document.querySelectorAll('.insurance_box_container input[type="checkbox"]');
-      checkboxes.forEach(function(checkbox) {
-          if (checkbox.id !== checkboxId) {
-              checkbox.checked = false;
-          }
-      });
-
-      if(checkboxId == "supplemental_liability_coverage"){
-        document.getElementById("insurance-amount").innerText = ({{ car.supplemental_liability_coverage }}*day) + "$";
-        let totalamount = (({{ car.rent_per_day_price }} + {{ car.supplemental_liability_coverage }})*day + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100))
-        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
-        inputElement.value = {{ car.supplemental_liability_coverage }} * day;
-      }
-      else if (checkboxId == "damage_coverage") {
-        document.getElementById("insurance-amount").innerText = ({{ car.damage_coverage }}*day) + "$";
-        let totalamount = (({{ car.rent_per_day_price }} + {{ car.damage_coverage }})*day) + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100);
-        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
-        inputElement.value ={{ car.damage_coverage }} * day;
-      } else {
-        document.getElementById("insurance-amount").innerText = 0 + "$";
-        let totalamount = (({{ car.rent_per_day_price }})*day) + ({{car.rent_per_day_price}}*(day||0)) * ({{ car.total_tax}}/100)
-        document.getElementById("subtotal-amount").innerText = (totalamount*((100 - discountPercentage)/100)).toFixed(2);
-        inputElement.value =0;
-      }
-      
-  }
 
   
   function resetCheckboxes() {
@@ -280,13 +274,17 @@ $('#apply-coupon-btn').click(function(){
           if (data.success) {
               // Update the total amount displayed on the page
               document.getElementById("coupon-message").innerText = "*"+data.message;
-              document.getElementById("summary-discount").innerText= data.discountPercentage + "$"
+              document.getElementById("summary-discount").innerText= data.discountPercentage + "%"
               discountPercentage = data.discountPercentage
-              getFormValues();
+              getFormValues(true);
               let discountinput = document.getElementById("discount_input");
               let couponinput = document.getElementById("coupon_input");
               couponinput.value = couponCode;
               discountinput.value = data.discountPercentage;
+
+              let discountSummaryDiv = document.getElementById("discount_summary");
+              discountSummaryDiv.style.display = "table-row";
+              
           } else {
               // Invalid coupon code
               alert(data.message);

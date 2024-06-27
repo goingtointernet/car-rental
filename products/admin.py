@@ -19,6 +19,6 @@ class ProductModelAdmin(admin.ModelAdmin):
 #Rental
 @admin.register(CustomDiscount)
 class CustomDiscountModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'discount_price_percentage','discount_valid_days', 'created_at']
+    list_display = ['id', 'discount_price_percentage','seven_day_booking_discount_percentage','valid_from', 'valid_to']
 
 admin.site.register(ProductImages)

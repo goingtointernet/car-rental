@@ -1,5 +1,6 @@
 from django.db import models
 from account.models import User
+from django.utils import timezone
 
 # Category
 class Category(models.Model):
@@ -52,7 +53,10 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     selling_price = models.FloatField()
     rent_per_day_price = models.FloatField()
+    custom_deposite_percentage = models.FloatField(default=0)
     total_tax = models.FloatField(default=0)
+    # discount = models.FloatField(default=0)
+    # seven_day_book_discount = models.FloatField(default=0)
     description = models.TextField()
     seats = models.FloatField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -77,10 +81,14 @@ class Product(models.Model):
         <li>Helps to eliminate frizz and fly-always and resist humidity for longer lasting style </li>
         <li>Helps to leave hair healthy and more manageable </li>
     </ul>''')
-    is_available = models.BooleanField(default=True)
-    use_own_insurance = models.BooleanField(default=False)
-    supplemental_liability_coverage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    damage_coverage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    insurance_name = models.CharField(max_length=300, default="")
+    insurance_amount_per_day = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+
+    seller_name = models.CharField(max_length=300, default="")
+    seller_email = models.CharField(max_length=300, default="")
+    seller_phone = models.CharField(max_length=300, default="")
+
     permalink =models.CharField(max_length=70, unique=True)
 
     def __str__(self):
@@ -110,5 +118,8 @@ class Review(models.Model):
 class CustomDiscount(models.Model):
     # your existing fields
     discount_price_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    discount_valid_days = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    seven_day_booking_discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    valid_cars = models.ManyToManyField(Product, null = True)
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_to = models.DateTimeField(default=timezone.now)
+    active = models.BooleanField(default=True)
