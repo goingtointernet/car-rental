@@ -119,7 +119,24 @@
             </td>
           </tr>
           <tr>
-            <td>{{car.insurance_name}} Insurance</td>
+            <td>
+              {{car.insurance_name}} Insurance
+              {% if car.insurance_amount_per_day > 0 %}
+              <br/>
+
+              <div style="display: flex;">
+                <div style="margin-right: 20px;">
+                  <input type="radio" name="insurance" id="insurance-yes" checked/>
+                  <label for="insurance-yes">Yes</label>
+                </div>
+                <div>
+                  <input type="radio" name="insurance" id="insurance-no"/>
+                  <label for="insurance-no">No</label>
+                </div>
+              </div>
+              {% endif %}
+
+            </td>
             <td class="summary-tabel-amount" id="insurance-amount">
               0$
             </td>
@@ -143,7 +160,7 @@
               $<span id="subtotal-amount" style="color: #333333">0</span>
             </td>
           </tr>
-          {% if car.custom_deposite_percentage > 0 %}
+          {% if car.custom_deposite > 0 %}
           <tr>
             <td class="summary-subtotal-h">Custom Deposit</td>
             <td class="summary-tabel-subamount">
@@ -192,9 +209,33 @@
     {% else %}
     let discountPercentage = 0;
     {% endif %}
+
+
+
     let day = 0;
+    let insuranceAmount = {{car.insurance_amount_per_day}};
     var inputElement = document.getElementById("input_insurance_amount");
-    console.log(discountPercentage,"discountPercentage")
+    
+
+    document.getElementById('insurance-yes').addEventListener('change', function() {
+      if (this.checked) {
+        insuranceAmount = {{car.insurance_amount_per_day}};
+        getFormValues();
+      }
+    });
+  
+    document.getElementById('insurance-no').addEventListener('change', function() {
+      if (this.checked) {
+        insuranceAmount = 0;
+        getFormValues();
+      }
+    }); 
+
+    if (document.getElementById('insurance-no').checked) {
+      insuranceAmount = 0;
+    }
+    
+
     getFormValues();
     function getFormValues(couponCheck) {
         // Retrieve the values using JavaScript
@@ -226,22 +267,22 @@
         // Do something with the calculated value (e.g., log or alert)
         document.getElementById("summary-days").innerText = daysDiff||0;
         // document.getElementById("total-amount").innerText = ({{ car.rent_per_day_price }} * (daysDiff)).toFixed(2) + "$";
-        let subtotal_amount = ((((({{ car.rent_per_day_price }}*(daysDiff)) + ({{car.insurance_amount_per_day}}*(daysDiff||0)) + (({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100))))*((100 - discountPercentage)/100)) + 0)||0;
+        let subtotal_amount = (((({{car.rent_per_day_price}}*(daysDiff)) + (insuranceAmount*(daysDiff||0)) + ((({{car.rent_per_day_price}}*(daysDiff||0)) + (insuranceAmount*(daysDiff||0)) ) * ({{ car.total_tax}}/100)))*((100 - discountPercentage)/100)) + 0)||0;
         document.getElementById("subtotal-amount").innerText = subtotal_amount;
         inputElement.value =0;
         console.log('Pickup Date:', pickupDate);
         console.log('Dropoff Date:', dropoffDate);
         console.log('Number of days:', daysDiff);
 
-        document.getElementById("summary_tax").innerText =({{car.rent_per_day_price}}*(daysDiff||0)) * ({{ car.total_tax}}/100) + "$";
-        document.getElementById("insurance-amount").innerText =({{car.insurance_amount_per_day}}*(daysDiff||0)) + "$";
+        document.getElementById("summary_tax").innerText =(({{car.rent_per_day_price}}*(daysDiff||0)) + (insuranceAmount*(daysDiff||0)) ) * ({{ car.total_tax}}/100) + "$";
+        document.getElementById("insurance-amount").innerText =(insuranceAmount*(daysDiff||0)) + "$";
         let insurance_input = document.getElementById("input_insurance_amount");
-        insurance_input.value = ({{car.insurance_amount_per_day}}*(daysDiff||0));
+        insurance_input.value = (insuranceAmount*(daysDiff||0));
         
-        {% if car.custom_deposite_percentage %}
+        {% if car.custom_deposite %}
           let custom_deposite = document.getElementById("custom_deposite_input");
-          custom_deposite.value = subtotal_amount * {{car.custom_deposite_percentage}}/100;
-          document.getElementById("custome-amount").innerText = subtotal_amount * {{car.custom_deposite_percentage}}/100;
+          custom_deposite.value = {{car.custom_deposite}};
+          document.getElementById("custome-amount").innerText ={{car.custom_deposite}};
         {% endif %}
         resetCheckboxes();
     }

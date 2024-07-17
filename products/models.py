@@ -53,7 +53,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     selling_price = models.FloatField()
     rent_per_day_price = models.FloatField()
-    custom_deposite_percentage = models.FloatField(default=0)
+    custom_deposite = models.FloatField(default=0)
     total_tax = models.FloatField(default=0)
     # discount = models.FloatField(default=0)
     # seven_day_book_discount = models.FloatField(default=0)

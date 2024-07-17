@@ -244,7 +244,7 @@ def save_booking(request):
                 rental_days = 1
 
             car_instance = Product.objects.get(id=car_id)
-            total_amount = ((((car_instance.rent_per_day_price) * rental_days) + ((car_instance.rent_per_day_price * rental_days) * car_instance.total_tax/100) ) + int(insurance_amount) ) * ((100 - float(discount_percentage)) / 100)
+            total_amount = ((((car_instance.rent_per_day_price) * rental_days) + (((car_instance.rent_per_day_price * rental_days) + int(insurance_amount)) * car_instance.total_tax/100) ) + int(insurance_amount) ) * ((100 - float(discount_percentage)) / 100)
             print(total_amount,"total_amount")
 
             remaning_amount = 0
@@ -267,7 +267,7 @@ def save_booking(request):
                 total_amount = int(total_amount),
                 user_name=name,
                 insurance_amount = insurance_amount,
-                total_tax_amount=(car_instance.rent_per_day_price * rental_days) * car_instance.total_tax/100,
+                total_tax_amount=((car_instance.rent_per_day_price * rental_days) + int(insurance_amount)) * car_instance.total_tax/100,
                 user_phone=phone,
                 user_address=user_address,
                 custom_deposit=custom_deposite,
