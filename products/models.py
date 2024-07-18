@@ -63,14 +63,18 @@ class Product(models.Model):
     sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
     product_thumb = models.ImageField(upload_to='product_img')
     product_images = models.ManyToManyField(ProductImages, null = True)
-    instructions = models.CharField(max_length=300, default="")
-    features = models.CharField(max_length=500, default="")
-    pro_tips = models.CharField(max_length=500)
     complete_location = models.CharField(max_length=300, default="")
     city = models.CharField(max_length=300, default="")
     country = models.CharField(max_length=300, default="")
     available_timing = models.ManyToManyField(AvaibleTiming, null = True)
     pickup_locations = models.ManyToManyField(PickupLocation, null = True)
+    features_heading = models.CharField(max_length=500, default="Features")
+    features = models.CharField(max_length=500, default="")
+    instructions_heading = models.CharField(max_length=500, default="instructions")
+    instructions = models.CharField(max_length=300, default="")
+    why_choose_this_heading = models.CharField(max_length=500, default="Why Choose This")
+    why_choose_this = models.CharField(max_length=500)
+    heighlights_heading = models.CharField(max_length=500, default="Highlights")
     heighlights = models.TextField(default='''
     <strong>What is it? </strong>
     <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reiciendis vero voluptas ducimus inventore enim. Voluptas ipsam modi aliquid dicta voluptatem sit rem praesentium repellat corrupti, officia ducimus quos saepe molestias.</p>

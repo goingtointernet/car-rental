@@ -107,10 +107,10 @@
 <section class="product-all-info">
     <!--product-info-menu-->
     <ul class="product-info-menu">
-        <li class="active product-info-list" data-filter="heighlights">Heighlights</li>
-        <li class="product-info-list" data-filter="ingredients">Features</li>
-        <li class="product-info-list" data-filter="howuse">Instructions</li>
-        <li class="product-info-list" data-filter="protips">Why Choose This</li>
+        <li class="active product-info-list" data-filter="heighlights">{{product.heighlights_heading}}</li>
+        <li class="product-info-list" data-filter="ingredients">{{product.features_heading}}</li>
+        <li class="product-info-list" data-filter="howuse">{{product.instructions_heading}}</li>
+        <li class="product-info-list" data-filter="protips">{{product.why_choose_this_heading}}</li>
     </ul>
     <!--heighlight-->
     <div class="heighlight-info-container product-info-container heighlights active">
@@ -126,7 +126,7 @@
     </div>
     <!--pro-tips-->
     <div class="protips-info-container product-info-container protips">
-        <p>{{product.pro_tips}}</p>
+        <p>{{product.why_choose_this}}</p>
     </div>
 
 </section>
